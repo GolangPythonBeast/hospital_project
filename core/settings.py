@@ -24,6 +24,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     'doctor',
     'patient',
     'userauths',
+
 ]
 
 MIDDLEWARE = [
@@ -74,6 +76,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
+
+# JAZZMIN SETTINGS
+JAZZMIN_UI_TWEAKS = {
+    "theme": "darkly",
 }
 
 
