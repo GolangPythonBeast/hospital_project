@@ -32,7 +32,7 @@ class Notification(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True,
                                blank=True)  # A doctor can have many notification
     appointment = models.ForeignKey("base.Appointment", on_delete=models.CASCADE, null=True, blank=True,
-                                    related_name='doctor_appointment_notification')
+                                    related_name='patient_appointment_notification')
     type = models.CharField(max_length=100, choices=NOTIFICATION_TYPE)
     seen = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)

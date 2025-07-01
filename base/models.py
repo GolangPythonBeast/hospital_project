@@ -1,7 +1,4 @@
 from django.db import models
-from django.template.defaultfilters import length
-from prompt_toolkit.layout import max_layout_dimensions
-
 from doctor import models as doctor_models
 from patient import models as patient_models
 from shortuuid.django_fields import ShortUUIDField
@@ -58,11 +55,25 @@ class Labtest(models.Model):
 
 class Prescription(models.Model):
     appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
-    medications = models.TextField(blank=True, null=True)
+    medication = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f'Description for {self.appointment.patient.full_name}'
 
 
 class Billing(models.Model):
-    patient = models.ForeignKey(patient_models.Patient, on_delete=models.CASCADE, )
+    STATUS = (
+        ('Unpaid', 'Unpaid'),
+        ('Paid', 'Paid')
+    )
+    patient = models.ForeignKey(patient_models.Patient, on_delete=models.SET_NULL, null=True, blank=True, related_name="patient_billing")
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='appoint_bill', blank=True, null=True)
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2)
+    tax = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=100, choices=STATUS)
+    billing_id = ShortUUIDField(length=6, max_length=10, alphabet='1234567890')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Billing for {self.patient.full_name} - Total: {self.total}'

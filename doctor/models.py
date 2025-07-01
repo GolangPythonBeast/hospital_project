@@ -4,7 +4,6 @@ from django.db import models
 from django.db.models import Model
 
 from userauths import models as userauths_models
-from django.utils import timezone
 
 NOTIFICATION_TYPE = (
     ("New Appointment", "New Appointment"),
