@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
 
+# SUPERUSER, graciousfx@gmail.com, AdminHA, 111teejay
 from ckeditor_demo.settings import MEDIA_ROOT
 from django.conf.global_settings import LOGIN_REDIRECT_URL, LOGOUT_REDIRECT_URL, AUTH_USER_MODEL
 
