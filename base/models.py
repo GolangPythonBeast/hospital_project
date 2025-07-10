@@ -27,7 +27,7 @@ class Appointment(models.Model):
     appointment_date = models.DateTimeField(null=True, blank=True)
     issues = models.TextField(blank=True, null=True)
     symptoms = models.TextField(blank=True, null=True)
-    appointment_is = ShortUUIDField(length=6, max_length=10, alphabet='1234567890')
+    appointment_id = ShortUUIDField(length=6, max_length=10, alphabet='1234567890')
     status = models.CharField(max_length=120, choices=STATUS)
 
     def __str__(self):
