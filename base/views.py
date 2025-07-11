@@ -3,6 +3,10 @@ from base.models import Services, Appointment, Billing
 from doctor.models import Doctor
 from patient.models import Patient
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from django.views import View
+from django.http import JsonResponse
+import requests
 
 # Create your views here.
 def index(request):
@@ -61,9 +65,10 @@ def book_appointment(request, service_id, doctor_id):
         billing.patient = patient
         billing.appointment = appointment
         billing.sub_total = appointment.service.cost
-        billing.tax = appointment.service * 5 / 100
+        billing.tax = appointment.service.cost * 5 / 100
         billing.total = billing.sub_total + billing.tax
         billing.status = "Unpaid"
+        billing.save()
         return redirect('checkout', billing.billing_id)
 
     context = {
@@ -72,3 +77,52 @@ def book_appointment(request, service_id, doctor_id):
         'patient': patient,
     }
     return render(request, 'book-appointment.html', context)
+
+
+@login_required
+def checkout(request, billing_id):
+    billing = Billing.objects.get(billing_id = billing_id)
+    context = {
+        'billing': billing,
+    }
+    return render(request, 'checkout.html', context)
+
+
+class PaystackPaymentView(View):
+    def get(self, request):
+        return render(request, 'payment_page.html', {
+            'paystack_public_key': settings.PAYSTACK_PUBLIC_KEY
+        })
+
+    def post(self, request):
+        email = request.POST.get('email')
+        amount = int(float(request.POST.get('amount')) * 100)  # Paystack uses kobo/cent
+
+        url = "https://api.paystack.co/transaction/initialize"
+        headers = {
+            "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+            "Content-Type": "application/json",
+        }
+        data = {
+            "email": email,
+            "amount": amount,
+            "callback_url": "http://yourdomain.com/verify-payment/",  # Your callback URL
+        }
+
+        response = requests.post(url, headers=headers, json=data)
+        return JsonResponse(response.json())
+
+
+# views.py
+class VerifyPaymentView(View):
+    def get(self, request, ref):
+        url = f"https://api.paystack.co/transaction/verify/{ref}"
+        headers = {
+            "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        }
+        response = requests.get(url, headers=headers).json()
+
+        if response['status']:
+            # Successful payment logic
+            return JsonResponse({"status": True, "data": response['data']})
+        return JsonResponse({"status": False})

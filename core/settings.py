@@ -1,8 +1,11 @@
 import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
-
+from decouple import config
 # SUPERUSER, graciousfx@gmail.com, AdminHA, 111teejay
+
+
+
 from ckeditor_demo.settings import MEDIA_ROOT
 from django.conf.global_settings import LOGIN_REDIRECT_URL, LOGOUT_REDIRECT_URL, AUTH_USER_MODEL
 
@@ -14,7 +17,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6-#swj8mgy@a3_n4s1(__u0ya_)5sarv25x+yrn#&mq!5_5m3v'
+SECRET_KEY = config('SECRET_KEY')
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

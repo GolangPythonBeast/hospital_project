@@ -18,7 +18,7 @@ class Patient(models.Model):
     image = models.FileField(upload_to="images", null=True, blank=True)
     full_name = models.CharField(max_length=100, null=True, blank=True)
     mobile = models.CharField(max_length=100, null=True, blank=True)
-    Address = models.CharField(max_length=100, null=True, blank=True)
+    address = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
     gender = models.CharField(max_length=100, null=True, blank=True)
     date_of_birth = models.CharField(max_length=100, null=True, blank=True)

@@ -1,10 +1,9 @@
 from time import timezone
 from tkinter.constants import CASCADE
-
 from django.db import models
 from django.db.models import Model
-
 from userauths import models as userauths_models
+
 
 NOTIFICATION_TYPE = (
     ("New Appointment", "New Appointment"),
@@ -26,6 +25,7 @@ class Doctor(models.Model):
 
     def __str__(self):
         return f'DR. {self.full_name}'
+
 
 class Notification(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, blank=True) # A doctor can have many notification
