@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Patient, Notification
+from .models import Patient, Patient_notification
 # Register your models here.
 
 
@@ -10,4 +10,4 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ['patient', 'appointment', 'type', 'seen', 'date']
 
 admin.site.register(Patient, PatientAdmin)
-admin.site.register(Notification, NotificationAdmin)
+admin.site.register(Patient_notification, NotificationAdmin)

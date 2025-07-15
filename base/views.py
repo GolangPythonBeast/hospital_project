@@ -1,12 +1,16 @@
 from django.shortcuts import render, redirect
+from flask import session
+
 from base.models import Services, Appointment, Billing
-from doctor.models import Doctor
-from patient.models import Patient
+from doctor.models import Doctor, Doctor_notification
+from patient.models import Patient, Patient_notification
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.views import View
 from django.http import JsonResponse
 import requests
+from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 
 # Create your views here.
 def index(request):
@@ -85,59 +89,70 @@ def checkout(request, billing_id):
     context = {
         'billing': billing,
         'paystack_public_key': settings.PAYSTACK_PUBLIC_KEY,
+        'flutterwave_public_key': settings.FLUTTERWAVE_PUBLIC_KEY,
     }
     return render(request, 'checkout.html', context)
 
 
-class PaystackPaymentView(View):
-    def get(self, request):
-        return render(request, 'payment_page.html', {
-            'paystack_public_key': settings.PAYSTACK_PUBLIC_KEY
-        })
 
-    def post(self, request):
-        email = request.POST.get('email')
-        amount = int(float(request.POST.get('amount')) * 100)  # Paystack uses kobo/cent
+def verify_paystack_payment(request, ref):
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+    }
+    url = f"https://api.paystack.co/transaction/verify/{ref}"
 
-        url = "https://api.paystack.co/transaction/initialize"
-        headers = {
-            "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-            "Content-Type": "application/json",
-        }
-        data = {
-            "email": email,
-            "amount": amount,
-            "callback_url": "http://yourdomain.com/verify-payment/",  # Your callback URL
-        }
+    response = requests.get(url, headers=headers)
+    res_data = response.json()
 
-        response = requests.post(url, headers=headers, json=data)
-        return JsonResponse(response.json())
+    if res_data['status'] and res_data['data']['status'] == 'success':
+        amount = res_data['data']['amount'] / 100  # convert kobo to Naira
+        email = res_data['data']['customer']['email']
+        # ✅ Payment was successful
+        # TODO: Update your database here
+        billing_id = ref.split("-")[2]
+        billing = Billing.objects.get(billing_id=billing_id)
+        try:
+
+            if billing.status == 'Unpaid':
+                billing.status = 'Paid'
+                billing.save()
+
+                Doctor_notification.objects.create(
+                    doctor=billing.appointment.doctor,
+                    appointment=billing.appointment,
+                    type="New Appointment"
+                )
+                Patient_notification.objects.create(
+                    patient=billing.appointment.patient,
+                    appointment=billing.appointment,
+                    type="Appointment Scheduled"
+                )
+                return render(request, 'success.html')
+
+        except:
+            return render(request, 'failed.html')
 
 
-# views.py
-class VerifyPaymentView(View):
-    def get(self, request, ref):
-        url = f"https://api.paystack.co/transaction/verify/{ref}"
-        headers = {
-            "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-        }
-        response = requests.get(url, headers=headers).json()
-
-        if response['status']:
-            # Successful payment logic
-            return JsonResponse({"status": True, "data": response['data']})
-        return JsonResponse({"status": False})
 
 
-def verify_payment(request, reference):
-    url = f"https://api.paystack.co/transaction/verify/{reference}"
-    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
-    response = requests.get(url, headers=headers).json()
-
-    if response['status'] and response['data']['status'] == 'success':
-        # Payment was successful
-        amount_paid = response['data']['amount'] / 100  # Convert back to dollars
-        # Update your billing model here
-        return render(request, 'payment_success.html')
     else:
-        return render(request, 'payment_failed.html')
+        return render(request, 'failed.html')
+
+
+
+
+
+
+
+def verify_flutterwave_transaction(transaction_id):
+    url = f"https://api.flutterwave.com/v3/transactions/{transaction_id}/verify"
+    headers = {
+        "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY}"
+    }
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+def payment_failed(request):
+    return render(request, 'payment_failed.html')
+

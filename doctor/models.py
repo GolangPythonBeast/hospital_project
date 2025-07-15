@@ -27,7 +27,7 @@ class Doctor(models.Model):
         return f'DR. {self.full_name}'
 
 
-class Notification(models.Model):
+class Doctor_notification(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, blank=True) # A doctor can have many notification
     appointment = models.ForeignKey("base.Appointment", on_delete=models.CASCADE, null=True, blank=True, related_name='doctor_appointment_notification')
     type = models.CharField(max_length=100, choices=NOTIFICATION_TYPE)

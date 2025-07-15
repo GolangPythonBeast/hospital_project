@@ -1,8 +1,4 @@
-from tkinter.constants import CASCADE
-
 from django.db import models
-from django.db.models import Model
-
 from userauths import models as userauths_models
 from django.utils import timezone
 
@@ -28,7 +24,7 @@ class Patient(models.Model):
         return f'{self.full_name}'
 
 
-class Notification(models.Model):
+class Patient_notification(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True,
                                blank=True)  # A doctor can have many notification
     appointment = models.ForeignKey("base.Appointment", on_delete=models.CASCADE, null=True, blank=True,
