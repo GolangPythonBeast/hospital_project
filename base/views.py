@@ -115,6 +115,7 @@ def verify_paystack_payment(request, ref):
 
             if billing.status == 'Unpaid':
                 billing.status = 'Paid'
+                billing.appointment.status = 'Completed'
                 billing.save()
 
                 Doctor_notification.objects.create(
@@ -131,9 +132,6 @@ def verify_paystack_payment(request, ref):
 
         except:
             return render(request, 'failed.html')
-
-
-
 
     else:
         return render(request, 'failed.html')
