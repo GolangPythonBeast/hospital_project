@@ -84,6 +84,7 @@ def checkout(request, billing_id):
     billing = Billing.objects.get(billing_id = billing_id)
     context = {
         'billing': billing,
+        'paystack_public_key': settings.PAYSTACK_PUBLIC_KEY,
     }
     return render(request, 'checkout.html', context)
 
@@ -126,3 +127,17 @@ class VerifyPaymentView(View):
             # Successful payment logic
             return JsonResponse({"status": True, "data": response['data']})
         return JsonResponse({"status": False})
+
+
+def verify_payment(request, reference):
+    url = f"https://api.paystack.co/transaction/verify/{reference}"
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+    response = requests.get(url, headers=headers).json()
+
+    if response['status'] and response['data']['status'] == 'success':
+        # Payment was successful
+        amount_paid = response['data']['amount'] / 100  # Convert back to dollars
+        # Update your billing model here
+        return render(request, 'payment_success.html')
+    else:
+        return render(request, 'payment_failed.html')
