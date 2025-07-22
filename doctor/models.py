@@ -3,6 +3,8 @@ from tkinter.constants import CASCADE
 from django.db import models
 from django.db.models import Model
 from userauths import models as userauths_models
+from django.utils import timezone
+from datetime import datetime
 
 
 NOTIFICATION_TYPE = (
@@ -21,7 +23,7 @@ class Doctor(models.Model):
     specialization = models.CharField(max_length=100, null=True, blank=True)
     qualification = models.CharField(max_length=100, null=True, blank=True)
     years_of_experience = models.CharField(max_length=100, null=True, blank=True)
-    next_available_appointment_date = models.DateTimeField(default=timezone, null=True, blank=True)
+    next_available_appointment_date = models.DateTimeField(default=timezone.now(), null=True, blank=True)
 
     def __str__(self):
         return f'DR. {self.full_name}'

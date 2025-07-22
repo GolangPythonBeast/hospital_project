@@ -17,7 +17,7 @@ class Patient(models.Model):
     address = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
     gender = models.CharField(max_length=100, null=True, blank=True)
-    date_of_birth = models.CharField(max_length=100, null=True, blank=True)
+    date_of_birth = models.DateTimeField(default=timezone.now(), null=True, blank=True)
     bood_group = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):

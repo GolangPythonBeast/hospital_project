@@ -1,26 +1,21 @@
 from django.shortcuts import render, redirect
-from flask import session
-
 from base.models import Services, Appointment, Billing
 from doctor.models import Doctor, Doctor_notification
 from patient.models import Patient, Patient_notification
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.views import View
-from django.http import JsonResponse
 import requests
-from django.views.decorators.csrf import csrf_exempt
-from django.urls import reverse
+
 
 # Create your views here.
 def index(request):
     services = Services.objects.all()
     appointments = Appointment.objects.all()
-
     context = {
         'services': services,
     }
     return render(request, 'index.html', context)
+
 
 def service_detail(request, id):
     service = Services.objects.get(id=id)
@@ -28,6 +23,7 @@ def service_detail(request, id):
         'service': service,
     }
     return render(request, 'service-detail.html', context)
+
 
 @login_required
 def book_appointment(request, service_id, doctor_id):
@@ -94,7 +90,6 @@ def checkout(request, billing_id):
     return render(request, 'checkout.html', context)
 
 
-
 def verify_paystack_payment(request, ref):
     headers = {
         "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
@@ -112,7 +107,6 @@ def verify_paystack_payment(request, ref):
         billing_id = ref.split("-")[2]
         billing = Billing.objects.get(billing_id=billing_id)
         try:
-
             if billing.status == 'Unpaid':
                 billing.status = 'Paid'
                 billing.appointment.status = 'Completed'
@@ -135,11 +129,6 @@ def verify_paystack_payment(request, ref):
 
     else:
         return render(request, 'failed.html')
-
-
-
-
-
 
 
 def verify_flutterwave_transaction(transaction_id):
